@@ -1,17 +1,34 @@
 import streamlit as st
 import joblib
 import os
+import requests
+
+# Fungsi untuk mendownload model dari GitHub
+def download_model(url, model_path):
+    try:
+        response = requests.get(url)
+        response.raise_for_status()  # Untuk memeriksa status kode 200
+        with open(model_path, 'wb') as file:
+            file.write(response.content)
+        st.success("Model berhasil didownload.")
+    except requests.exceptions.RequestException as e:
+        st.error(f"Terjadi kesalahan saat mendownload model: {e}")
 
 # Fungsi Prediksi dengan Model ML
 def predict_status(last_gpa, preparation_0_1_hour, preparation_2_3_hours, preparation_more_than_3_hours, 
                    attendance_80_100, attendance_60_79, attendance_40_59, attendance_below_40, semester):
-    # Load Model
     model_path = 'student_mod.pkl'
+
+    # Mengecek apakah model sudah ada, jika tidak download
     if not os.path.exists(model_path):
+        model_url = "https://github.com/adistyadito/PBL-BDL03/raw/refs/heads/main/streamlit/student_mod.pkl"
+        download_model(model_url, model_path)
+    
+    if os.path.exists(model_path):
+        model = joblib.load(model_path)
+    else:
         st.error("Model tidak ditemukan! Harap tambahkan model yang valid.")
         return "Error"
-
-    model = joblib.load(model_path)
 
     # Format input untuk model
     input_data = [[last_gpa, preparation_0_1_hour, preparation_2_3_hours, preparation_more_than_3_hours, 
