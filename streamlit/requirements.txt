@@ -2,3 +2,4 @@ plotly_express
 altair
 pandas
 joblib
+sklearn
